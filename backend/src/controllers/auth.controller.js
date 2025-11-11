@@ -13,7 +13,7 @@ export const signupLocally = async (req,res,next) => {
 
         //Email to user
 
-        res.status(201).json({ success: true, message: "New User created successfully" });
+        res.status(201).json({ success: true, message: "New User created successfully", data: { userId: user._id, email, fullName, profilePic: user.profilePic } });
     } catch (error) {
         next(error);
     }
