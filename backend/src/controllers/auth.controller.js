@@ -3,6 +3,9 @@ import USER from "../models/user.model.js";
 import createError from "../utils/createError.js";
 import generateToken from "../utils/generateToken.js";
 import sendEmail from "../utils/sendEmail.js";
+import cloudinary from "../lib/cloudinary.js";
+import mongoose from "mongoose";
+import fs from 'fs';
 
 export const signupLocally = async (req,res,next) => {
     try {
@@ -49,6 +52,49 @@ export const logout = (_,res,next) => {
         });
 
         res.status(200).json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateProfile = async (req,res,next) => {
+    try {
+        const { fullName } = req.body;
+        const userId = req.userId;
+
+        const user = await USER.findById(userId);
+
+        if (fullName) user.fullName = fullName;
+
+        if (req.file){
+            const uploadResponse = await cloudinary.uploader.upload(req.file.path, { folder: "KernelChat", resource_type: "image" });
+
+            if (user.profilePic_public_id){
+                await cloudinary.uploader.destroy(user.profilePic_public_id);
+            }
+
+            user.profilePic = uploadResponse.secure_url;
+            user.profilePic_public_id = uploadResponse.public_id;
+
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error("Error deleting temp file:", err);
+            });
+        }
+
+        await user.save();
+        res.status(200).json({ success: true, message: "Profile updated successfully" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getProfileDetails = async (req,res,next) => {
+    try {
+        const userId = req.userId;
+
+        const user = await USER.findById(userId).select("-password");
+
+        res.status(200).json({ success: true, data: { userId: user._id, email: user.email, fullName: user.fullName, profilePic: user.profilePic } });
     } catch (error) {
         next(error);
     }

@@ -1,4 +1,5 @@
 import { validationResult } from "express-validator";
+import fs from "fs";
 
 const handleFormError = (req,res,next) => {
     const result = validationResult(req);
@@ -9,7 +10,11 @@ const handleFormError = (req,res,next) => {
         );
 
         if (req.file){
-
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    console.error("Error deleting orphaned file on validation fail:", err);
+                }
+            });
         }
 
         return res.status(400).json({success: false, message: "Form validation error", errors});
