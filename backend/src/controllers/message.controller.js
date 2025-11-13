@@ -98,7 +98,7 @@ export const getChatPartners = async (req, res, next) => {
           profilePic: "$partnerInfo.profilePic",
           name: { $ifNull: ["$contactInfo.nickname", "$partnerInfo.fullName"] },
           lastMessageTime: "$lastMessageTime",
-          lastMessageText: "$lastMessage.text"
+          lastMessage: "$lastMessage._id"
         }
       }
     ];
@@ -114,7 +114,7 @@ export const getChatPartners = async (req, res, next) => {
 export const sendMessage = async (req,res,next) => {
     try {
         const { receiverId } = req.params;
-        const { text } = req.body;
+        const { text = null } = req.body;
         const senderId = req.userId;
 
         if (!mongoose.isValidObjectId(receiverId)){
