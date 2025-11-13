@@ -7,6 +7,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import contactRoutes from "./routes/contact.route.js";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -51,6 +52,7 @@ app.get("/", (_,res,next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.use((err,req,res,next) => {
     const status = err.status || 500;

@@ -10,4 +10,4 @@ const uploader = multer({ dest: "uploads/", limits: { fileSize: 2 * 1024 * 1024 
     }
 } })
 
-export default uploader.single("profilePic");
+export default uploader;

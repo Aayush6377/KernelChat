@@ -1,5 +1,14 @@
 import { Router } from "express";
+import arcjetProtection from "../middlewares/arcjet.middleware.js";
+import isLogin from "../middlewares/isLogin.js";
+import * as messageController from "../controllers/message.controller.js";
+import uploader from "../middlewares/upload.js";
 
 const router = Router();
+router.use(arcjetProtection, isLogin);
+
+router.get("/chat/:userToChatId", messageController.getMessagesByUserId);
+router.get("/chats", messageController.getChatPartners);
+router.post("/send/:receiverId", uploader.single("image"), messageController.sendMessage);
 
 export default router;
