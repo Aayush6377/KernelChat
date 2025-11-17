@@ -1,15 +1,18 @@
+import "./lib/config.js";
+import "./lib/passport.js";
+
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./lib/db.js";
 import createError from "./utils/createError.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import passport from "passport";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import contactRoutes from "./routes/contact.route.js";
 
-dotenv.config();
 const port = process.env.PORT || 3000;
 const frontend = process.env.FRONTEND_URL;
 
@@ -36,6 +39,7 @@ const corsOptions = {
     credentials: true
 };
 
+app.use(passport.initialize());
 app.use(cors(corsOptions));
 
 

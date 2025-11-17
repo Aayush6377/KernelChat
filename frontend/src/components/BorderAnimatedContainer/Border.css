@@ -1,0 +1,31 @@
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.border-animated-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  border-radius: 1rem; 
+  border: 1px solid transparent;
+
+  animation: border-spin 10s linear infinite;
+
+  background: 
+    linear-gradient(45deg, #172033, #1f2937 50%, #172033) padding-box,
+    conic-gradient(from var(--border-angle), 
+                   rgba(51, 65, 85, 0.48) 80%, 
+                   #06b6d4 86%, 
+                   #67e8f9 90%, 
+                   #06b6d4 94%, 
+                   rgba(51, 65, 85, 0.48)) border-box;
+}

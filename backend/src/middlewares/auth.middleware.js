@@ -51,15 +51,19 @@ export const loginValidator = [
 
   body("password")
   .notEmpty().withMessage("Password is required")
-  .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
-  .isStrongPassword().withMessage("Password must include uppercase, lowercase, number, and special character")
   .custom(async (value, { req }) => {
     const user = req.user;
     if (!user){
         return Promise.reject("Email not registered, please signup");
     }
 
-    const isMatch = await bcrypt.compare(value,user.password);
+    const password = user.password;
+
+    if (!password){
+      return Promise.reject("No password set. Log in with Google");
+    }
+
+    const isMatch = await bcrypt.compare(value,password);
     if (!isMatch) {
       return Promise.reject("Incorrect password");
     }
@@ -71,4 +75,20 @@ export const loginValidator = [
 export const updateProfileValidator = [
   body("fullName").trim().optional()
   .notEmpty().withMessage("Full Name is required")
+];
+
+export const resetPasswordValidator = [
+  body("password")
+  .notEmpty().withMessage("Password is required")
+  .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
+  .isStrongPassword().withMessage("Password must include uppercase, lowercase, number, and special character"),
+
+  body("confirm")
+  .notEmpty().withMessage("Confirm Password is required")
+  .custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error("Password and Confirm Password do not match");
+    }
+    return true;
+  })
 ];
