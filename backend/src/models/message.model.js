@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { fieldEncryption } from "mongoose-field-encryption";
 
 const messageSchema = new mongoose.Schema({
     senderId: {
@@ -21,6 +22,11 @@ const messageSchema = new mongoose.Schema({
     },
     imagePublicId: {
         type: String
+    },
+    conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Conversation",
+        required: true
     }
 }, { timestamps: true });
 
@@ -30,6 +36,12 @@ messageSchema.pre("validate", function(next) {
     } else {
         next();
     }
+});
+
+messageSchema.plugin(fieldEncryption, {
+    fields: ["text"], 
+    secret: process.env.MSG_ENCRYPTION_KEY,
+    salt: "a-static-salt-for-this-app",
 });
 
 const MESSAGE = mongoose.model("Message", messageSchema);

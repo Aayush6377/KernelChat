@@ -26,7 +26,7 @@ export const addContactValidator = [
         return true;
     }),
 
-    body("nickname").trim().optional()
+    body("nickname").trim()
     .notEmpty().withMessage("Nickname is required"),
 
     body("notes").optional().trim()

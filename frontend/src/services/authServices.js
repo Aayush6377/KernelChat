@@ -69,3 +69,13 @@ export const getProfileDetails = async () => {
         throw error;
     }
 }
+
+export const logout = async () => {
+    try {
+        const res = await api.post("/api/auth/logout");
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}

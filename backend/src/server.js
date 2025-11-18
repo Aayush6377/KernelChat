@@ -56,7 +56,7 @@ app.get("/", (_,res,next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/contact", contactRoutes);
+app.use("/api/contacts", contactRoutes);
 
 app.use((err,req,res,next) => {
     const status = err.status || 500;

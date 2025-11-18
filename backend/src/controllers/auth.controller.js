@@ -12,7 +12,7 @@ export const signupLocally = async (req,res,next) => {
     try {
         const { fullName, email, password, verifiedToken } = req.body;
 
-        const decoded = jwt.verify(verifiedToken, process.env.JWT_SECRETE);
+        const decoded = jwt.verify(verifiedToken, process.env.JWT_SECRET);
 
         if (!decoded.isVerified || decoded.email !== email) {
             throw createError(400, "Email verification failed.");
@@ -74,7 +74,7 @@ export const sendVerificationOtp = async (req,res,next) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const hashedOtp = await bcrypt.hash(otp,12);
 
-        const otpToken = jwt.sign({ email, hashedOtp }, process.env.JWT_SECRETE, { expiresIn: "5m" });
+        const otpToken = jwt.sign({ email, hashedOtp }, process.env.JWT_SECRET, { expiresIn: "5m" });
 
         try {
             const htmlContent = createOtpEmailTemplate(otp);
@@ -98,7 +98,7 @@ export const verifyEmailOtp = async (req,res,next) => {
     try {
         const { otp, otpToken } = req.body;
         
-        const decoded = jwt.verify(otpToken, process.env.JWT_SECRETE);
+        const decoded = jwt.verify(otpToken, process.env.JWT_SECRET);
 
         const { email, hashedOtp } = decoded;
         const isMatch = await bcrypt.compare(otp, hashedOtp);
@@ -107,7 +107,7 @@ export const verifyEmailOtp = async (req,res,next) => {
             throw createError(400, "Invalid OTP. Please try again.");
         }
 
-        const verifiedToken = jwt.sign( { email, isVerified: true }, process.env.JWT_SECRETE, { expiresIn: '5m' } );
+        const verifiedToken = jwt.sign( { email, isVerified: true }, process.env.JWT_SECRET, { expiresIn: '5m' } );
 
         res.status(200).json({ 
             success: true, 
@@ -129,7 +129,7 @@ export const sendPasswordResetEmail = async (req,res,next) => {
             res.status(200).json({ success: true, message: "If an account with this email exists, a password reset link has been sent." });
         }
 
-        const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRETE, { expiresIn: "5m" });
+        const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "5m" });
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
         try {
@@ -149,7 +149,7 @@ export const sendPasswordResetEmail = async (req,res,next) => {
 export const resetPassword = async (req,res,next) => {
     try {
         const { token, password } = req.body;
-        const decoded = jwt.verify(token, process.env.JWT_SECRETE);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await USER.findById(decoded.userId);
         if (!user){

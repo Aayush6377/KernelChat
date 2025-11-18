@@ -10,7 +10,7 @@ const isLogin = async (req,res,next) => {
             throw createError(401, "Unauthorized: No token provided");
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRETE);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await USER.findById(decoded.userId).select("-password");
 

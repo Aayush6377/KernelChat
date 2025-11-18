@@ -26,9 +26,9 @@ router.post("/reset-password", resetPasswordValidator, handleFormError, authCont
 
 router.use(isLogin);
 
+//Profile
 router.patch("/profile/update", uploader.single("profilePic"), updateProfileValidator, handleFormError, authController.updateProfile);
 router.get("/profile/details", authController.getProfileDetails);
-
 router.post("/logout", authController.logout);
 
 export default router;

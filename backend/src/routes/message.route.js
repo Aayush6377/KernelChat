@@ -8,7 +8,7 @@ const router = Router();
 router.use(arcjetProtection, isLogin);
 
 router.get("/chat/:userToChatId", messageController.getMessagesByUserId);
-router.get("/chats", messageController.getChatPartners);
+router.get("/chats/list", messageController.getChatPartners);
 router.post("/send/:receiverId", uploader.single("image"), messageController.sendMessage);
 
 export default router;
