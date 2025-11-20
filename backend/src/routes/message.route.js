@@ -9,6 +9,9 @@ router.use(arcjetProtection, isLogin);
 
 router.get("/chat/:userToChatId", messageController.getMessagesByUserId);
 router.get("/chats/list", messageController.getChatPartners);
+
 router.post("/send/:receiverId", uploader.single("image"), messageController.sendMessage);
+router.delete("/delete/:messageId", messageController.deleteMessage);
+router.put("/edit/:messageId", messageController.editMessage);
 
 export default router;

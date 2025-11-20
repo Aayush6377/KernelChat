@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { images } from "../assets/assets.js";
 import { getProfileDetails } from "../services/authServices.js";
+import { io } from "socket.io-client";
 
 const defaultUser = {
   userId: null,
@@ -9,11 +10,14 @@ const defaultUser = {
   profilePic: images.defaultProfile,
 };
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const useAuthStore = create((set, get) => ({
   user: defaultUser,
   isLoggedIn: false,
   appLoading: true,
-
+  socket: null,
+  onlineUsers: [],
 
   setUser: (user) => set({ user }),
 
@@ -28,6 +32,7 @@ const useAuthStore = create((set, get) => ({
         const res = await getProfileDetails();
         if (res.success && res.data) {
           set ({ user: res.data, isLoggedIn: true });
+          get().connectSocket();
         } else {
           set({ user: defaultUser, isLoggedIn: false });
         }
@@ -37,7 +42,28 @@ const useAuthStore = create((set, get) => ({
       } finally {
         set ({ appLoading: false });
       }
-    }
+    },
+
+    connectSocket: () => {
+      const { user } = get();
+      if (!user || get().socket?.connected) return;
+
+      const socket = io(BASE_URL, { withCredentials: true });
+
+      socket.connect();
+
+      set({socket});
+
+      socket.on("getOnlineUsers", (userIds) => {
+        set({ onlineUsers: userIds });
+      });
+    },
+
+    disconnectSocket: () => {
+      if (get().socket.connected){
+        get().socket.disconnect();
+      }
+    }, 
 }));
 
 export default useAuthStore;

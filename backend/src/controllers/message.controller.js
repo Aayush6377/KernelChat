@@ -5,6 +5,7 @@ import CONVERSATION from "../models/conversation.model.js";
 import CONTACT from "../models/contact.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import fs from "fs";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getMessagesByUserId = async (req,res,next) => {
     try {
@@ -310,19 +311,77 @@ export const sendMessage = async (req,res,next) => {
         convo.lastRead.set(senderId.toString(), new Date());
         await convo.save();
 
-        // const io = req.app.get('socketio');
-        
-        // // We need a way to find the receiver's specific socket
-        // // (This is managed in your main socket.io connection logic)
-        // const receiverSocketId = getReceiverSocketId(receiverId); // You must implement this helper
-        
-        // if (receiverSocketId) {
-        //     io.to(receiverSocketId).emit("newMessage", newMessage);
-        // }
+        const receiverSocketId = getReceiverSocketId(receiverId);
 
-        res.status(201).json({ success: true, data: newMessage });
+        if (receiverSocketId){
+          io.to(receiverSocketId).emit("newMessage", {...newMessage._doc, text});
+        }
+
+        res.status(201).json({ success: true, data: {...newMessage._doc, text} });
 
     } catch (error) {
         next(error);
     }
+}
+
+export const deleteMessage = async (req,res,next) => {
+  try {
+    const { messageId } = req.params;
+    const myId = req.userId;
+
+    const message = await MESSAGE.findById(messageId);
+    if (!message){
+      throw createError(404, "Message Not Found");
+    }
+
+    if (message.senderId.toString() !== myId){
+      throw createError(403, "Unauthorized User");
+    }
+
+    if (message.imagePublicId){
+      cloudinary.uploader.destroy(message.imagePublicId);
+    }
+
+    await MESSAGE.findByIdAndDelete(messageId);
+
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    
+    if (receiverSocketId){
+      io.to(receiverSocketId).emit("messageDeleted", messageId);
+    }
+
+    res.status(200).json({ success: true, message: "Message Deleted",messageId });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const editMessage = async (req,res,next) => {
+  try {
+    const { messageId } = req.params;
+    const { newText } = req.body;
+    const myId = req.userId;
+
+    const message = await MESSAGE.findById(messageId);
+    if (!message){
+      throw createError(404, "Message Not Found");
+    }
+
+    if (message.senderId.toString() !== myId){
+      throw createError(403, "Unauthorized User");
+    }
+
+    message.text = newText;
+    await message.save();
+
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+
+    if (receiverSocketId){
+      io.to(receiverSocketId).emit("messageUpdated", { messageId, newText });
+    }
+
+    res.status(200).json({ success: true, message: "Message updated", data: message });
+  } catch (error) {
+    next(error);
+  }
 }

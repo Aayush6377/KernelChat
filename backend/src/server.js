@@ -1,5 +1,6 @@
 import "./lib/config.js";
 import "./lib/passport.js";
+import { app, server } from "./lib/socket.js";
 
 import express from "express";
 import dotenv from "dotenv";
@@ -16,7 +17,6 @@ import contactRoutes from "./routes/contact.route.js";
 const port = process.env.PORT || 3000;
 const frontend = process.env.FRONTEND_URL;
 
-const app = express();
 connectDB();
 
 app.use(express.json());
@@ -64,7 +64,7 @@ app.use((err,req,res,next) => {
     res.status(status).json({ success: false, status, message });
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
 

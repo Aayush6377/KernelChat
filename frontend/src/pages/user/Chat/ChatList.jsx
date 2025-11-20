@@ -3,7 +3,7 @@ import useAuthStore from "../../../store/useAuthStore";
 import { images } from "../../../assets/assets";
 import { MdStar } from "react-icons/md";
 import { getChatList } from "../../../services/userServices";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import UserLoadingSkeleton from "../../../components/UsersLoadingSkeleton/UsersLoadingSkeleton";
 import EmptyListView from "../../../components/EmptyListView/EmptyListView"; 
@@ -11,10 +11,13 @@ import EmptyListView from "../../../components/EmptyListView/EmptyListView";
 import { MessageCircleIcon } from "lucide-react";
 import { FaRegUser } from "react-icons/fa6";
 import { MdOutlineStarBorder } from "react-icons/md";
+import { useEffect } from "react";
 
 
 const ChatList = ({ listType }) => {
-    const { searchTerm, setActiveTab } = useChatStore();
+    const { searchTerm, setActiveTab, selectedUser } = useChatStore();
+    const { socket, user: currentUser } = useAuthStore();
+    const queryClient = useQueryClient();
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['chatList', listType, searchTerm],
@@ -22,6 +25,53 @@ const ChatList = ({ listType }) => {
     });
     
     const chats = data?.data || [];
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (newMessage) => {
+            queryClient.setQueriesData({ queryKey: ['chatList'] }, (oldData) => {
+                if (!oldData || !oldData.data) return oldData;
+
+                const currentChats = oldData.data;
+                const chatIndex = currentChats.findIndex(c => c.userId === newMessage.senderId || c.userId === newMessage.receiverId);
+
+                if (chatIndex !== -1) {
+                    const isChatOpen = selectedUser?.userId === newMessage.senderId;
+                    
+                    const shouldIncrement = newMessage.receiverId === currentUser.userId && !isChatOpen;
+
+                    const updatedChat = { 
+                        ...currentChats[chatIndex],
+                        lastMessage: {
+                            text: newMessage.text,
+                            image: newMessage.image,
+                            senderId: newMessage.senderId,
+                            createdAt: newMessage.createdAt
+                        },
+                        unseenMessages: shouldIncrement
+                            ? (currentChats[chatIndex].unseenMessages || 0) + 1 
+                            : currentChats[chatIndex].unseenMessages 
+                    };
+
+                    const newChats = [
+                        updatedChat,
+                        ...currentChats.filter((_, i) => i !== chatIndex)
+                    ];
+                    
+                    return { ...oldData, data: newChats };
+                }
+                return oldData; 
+            });
+        };
+
+        socket.on("newMessage", handleNewMessage);
+
+        return () => {
+            socket.off("newMessage", handleNewMessage);
+        };
+
+    }, [socket, queryClient, listType, selectedUser, currentUser]);
 
     if (isLoading) {
         return <UserLoadingSkeleton />;
@@ -97,8 +147,9 @@ const formatLastMessageTime = (isoString) => {
 };
 
 const ChatListItem = ({ chat }) => {
-    const { user } = useAuthStore();
+    const { user, onlineUsers } = useAuthStore();
     const { setSelectedUser } = useChatStore();
+    const queryClient = useQueryClient();
 
     const renderLastMessage = () => {
         if (!chat.lastMessage) {
@@ -113,6 +164,19 @@ const ChatListItem = ({ chat }) => {
 
     const handleChatClick = () => {
         setSelectedUser(chat);
+
+        queryClient.setQueriesData({ queryKey: ['chatList'] }, (oldData) => {
+            if (!oldData || !oldData.data) return oldData;
+
+            const newChats = oldData.data.map(c => {
+                if (c.userId === chat.userId) {
+                    return { ...c, unseenMessages: 0 };
+                }
+                return c;
+            });
+
+            return { ...oldData, data: newChats };
+        });
     }
 
     return (
@@ -121,7 +185,7 @@ const ChatListItem = ({ chat }) => {
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors" 
             onClick={handleChatClick} 
         >
-            <div className="avatar online">
+            <div className={`avatar ${onlineUsers.includes(chat.userId) ? 'avatar-online' : ''}`}>
                 <div className="size-12 rounded-full">
                     <img src={chat.profilePic || images.defaultProfile} alt={chat.name} />
                 </div>

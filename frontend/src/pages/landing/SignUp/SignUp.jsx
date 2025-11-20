@@ -16,7 +16,7 @@ import { FcGoogle } from "react-icons/fc";
 const SignUp = () => {
     const [ formData, setFormData ] = useState({ fullName: "", email: "", password: "", confirm: "", verifiedToken: "" });
     const [ formErrors, setFormErrors ] = useState({ fullName: "", email: "", password: "", confirm: "" });
-    const { setLogin } = useAuthStore();
+    const { setLogin, connectSocket } = useAuthStore();
 
     const [otp, setOtp] = useState("");
     const [showOtpInput, setShowOtpInput] = useState(false);
@@ -64,6 +64,7 @@ const SignUp = () => {
         onSuccess: (res) => {
             setLogin(res.data);
             toast.success("Account created successfully!");
+            connectSocket();
         },
         onError: (err) => {
             if (err.response?.data?.errors) {

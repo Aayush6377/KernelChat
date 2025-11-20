@@ -14,13 +14,14 @@ import { FcGoogle } from "react-icons/fc";
 const Login = () => {
     const [ formData, setFormData ] = useState({ email: "", password: "" });
     const [ formErrors, setFormErrors ] = useState({ email: "", password: "" });
-    const { setLogin } = useAuthStore();
+    const { setLogin, connectSocket } = useAuthStore();
 
     const { mutate: loginByForm, isPending: isLoggingUpByForm } = useMutation({
         mutationFn: loginLocally,
         onSuccess: (res) => {
             setLogin(res.data);
             toast.success("Login successfully!");
+            connectSocket();
         },
         onError: (err) => {
             if (err.response?.data?.errors) {

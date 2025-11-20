@@ -1,14 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend server for KernelChat, a real-time messaging and chat application built with Node.js, Express, MongoDB, and Socket.IO.",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js"
   },
-  "keywords": [],
+  "keywords": [ "Node.js", "Express", "MongoDB", "Socket.IO", "real-time", "messaging", "chat", "application", "backend", "server", "KernelChat" ],
   "author": "Aayush Kukreja",
   "license": "ISC",
   "type": "module",
@@ -28,7 +28,8 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

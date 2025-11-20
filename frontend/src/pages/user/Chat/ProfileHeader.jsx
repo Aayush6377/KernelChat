@@ -9,7 +9,7 @@ import { IoVolumeHighSharp, IoVolumeMuteSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
 
 const ProfileHeader = () => {
-    const { user, setLogout } = useAuthStore();
+    const { user, setLogout, disconnectSocket } = useAuthStore();
     const {isSoundEnabled, toggleSound} = useChatStore();
 
     const { mutate: logoutMutate } = useMutation({
@@ -17,6 +17,7 @@ const ProfileHeader = () => {
         onSuccess: () => {
             setLogout();
             toast.success("Logout Successful!");
+            disconnectSocket();
         },
          onError: (err) => {
             toast.error(err?.response?.data?.message || err.message || "Logout Failed. Please try again.");

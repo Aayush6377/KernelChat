@@ -24,7 +24,37 @@ export const getMessagesByUserId = async (userToChatId) => {
 
 export const sendMessage = async (receiverId, text, image) => {
     try {
-        const res = await api.post(`/api/messages/send/${receiverId}`, { text, image });
+        const formData = new FormData();
+
+        if (text){
+            formData.append("text", text);
+        }
+
+        if (image){
+            formData.append("image", image);
+        }
+
+        const res = await api.post(`/api/messages/send/${receiverId}`, formData);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const deleteMessage = async (messageId) => {
+    try {
+        const res = await api.delete(`/api/messages/delete/${messageId}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const editMessage = async (messageId, newText) => {
+    try {
+        const res = await api.put(`/api/messages/edit/${messageId}`, { newText });
         return res.data;
     } catch (error) {
         console.log(error);
