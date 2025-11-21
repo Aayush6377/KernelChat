@@ -4,8 +4,9 @@ import login from "./images/login.png";
 import signup from "./images/signup.png";
 import forgotPassword from "./images/forgot-password.png";
 import resetPassword from "./images/reset-password.png";
+import kernelChatSS from "./images/KernelChat_SS.png";
 
-export const images = { defaultProfile, logo, login, signup, forgotPassword, resetPassword };
+export const images = { defaultProfile, logo, login, signup, forgotPassword, resetPassword, kernelChatSS };
 
 export const audios = {
     mouseClickSound: new Audio("/sounds/mouse-click.mp3"),
@@ -15,3 +16,10 @@ export const audios = {
     keyStroke3: new Audio("/sounds/keystroke3.mp3"),
     keyStroke4: new Audio("/sounds/keystroke4.mp3"),
 }
+
+export const profileLinks = {
+    github: 'https://github.com/Aayush6377',
+    linkedin: 'https://www.linkedin.com/in/aayush-kukreja-b5885324a',
+    instagram: "https://www.instagram.com/aayush_kukreja_75",
+    portfolio: "https://aayush-kukreja-portfolio.vercel.app",
+};

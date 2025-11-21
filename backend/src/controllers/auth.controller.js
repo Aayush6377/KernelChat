@@ -1,5 +1,8 @@
 import { createOtpEmailTemplate, createPasswordResetTemplate, createWelcomeEmailTemplate } from "../assets/emailTemplates.js";
 import USER from "../models/user.model.js";
+import MESSAGE from "../models/message.model.js";
+import CONTACT from "../models/contact.model.js";
+import CONVERSATION from "../models/conversation.model.js";
 import createError from "../utils/createError.js";
 import generateToken from "../utils/generateToken.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -7,6 +10,19 @@ import cloudinary from "../lib/cloudinary.js";
 import fs from 'fs';
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
+
+function generateAvatarUrl(name) {
+    const colors = [ "3B82F6", "10B981", "EF4444", "F59E0B", "8B5CF6", "EC4899", "14B8A6", "F97316", "6366F1", 
+        "84CC16", "D946EF", "0EA5E9", "A855F7", "06B6D4", "F43F5E"
+    ];
+
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    const encodedName = encodeURIComponent(name.trim());
+
+    return `https://ui-avatars.com/api/?name=${encodedName}&background=${randomColor}&color=fff&size=256`;
+}
+
 
 export const signupLocally = async (req,res,next) => {
     try {
@@ -18,7 +34,8 @@ export const signupLocally = async (req,res,next) => {
             throw createError(400, "Email verification failed.");
         }
 
-        const user = new USER({ fullName, email, password });
+        const profilePic = generateAvatarUrl(fullName);
+        const user = new USER({ fullName, email, password, profilePic });
 
         await user.save();
         generateToken({ userId: user._id, email }, res);
@@ -166,15 +183,20 @@ export const resetPassword = async (req,res,next) => {
     }
 }
 
-export const logout = (_,res,next) => {
+export const updatePassword = async (req,res,next) => {
     try {
-        res.clearCookie("jwt", {
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-            secure: process.env.NODE_ENV === "production"
-        });
+        const { password } = req.body;
+        const userId = req.userId;
 
-        res.status(200).json({ success: true, message: "Logged out successfully" });
+        const user = await USER.findById(userId);
+        if (!user){
+            throw createError(404, "User not found");
+        }
+
+        user.password = password; 
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         next(error);
     }
@@ -187,7 +209,12 @@ export const updateProfile = async (req,res,next) => {
 
         const user = await USER.findById(userId);
 
-        if (fullName) user.fullName = fullName;
+        if (fullName){
+            user.fullName = fullName;
+            if (!user.profilePic_public_id){
+                user.profilePic = generateAvatarUrl(fullName);
+            }
+        }
 
         if (req.file){
             const uploadResponse = await cloudinary.uploader.upload(req.file.path, { folder: "KernelChat", resource_type: "image" });
@@ -205,7 +232,7 @@ export const updateProfile = async (req,res,next) => {
         }
 
         await user.save();
-        res.status(200).json({ success: true, message: "Profile updated successfully" });
+        res.status(200).json({ success: true, message: "Profile updated successfully", data: { userId: user._id, email: user.email, fullName: user.fullName, profilePic: user.profilePic } });
     } catch (error) {
         next(error);
     }
@@ -222,3 +249,70 @@ export const getProfileDetails = async (req,res,next) => {
         next(error);
     }
 }
+
+export const logout = (_,res,next) => {
+    try {
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            secure: process.env.NODE_ENV === "production"
+        });
+
+        res.status(200).json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const deleteAccount = async (req, res, next) => {
+    try {
+        const userId = req.userId;
+
+        const user = await USER.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const deletePromises = [];
+
+        if (user.profilePic_public_id) {
+            deletePromises.push(cloudinary.uploader.destroy(user.profilePic_public_id));
+        }
+
+        const userMessages = await MESSAGE.find({
+            $or: [{ senderId: userId }, { receiverId: userId }]
+        });
+
+        const messageImageIds = userMessages.map((msg) => msg.imagePublicId).filter((id) => id); 
+
+        messageImageIds.forEach((publicId) => {
+            deletePromises.push(cloudinary.uploader.destroy(publicId));
+        });
+
+        if (deletePromises.length > 0) {
+            await Promise.all(deletePromises);
+        }
+
+        await Promise.all([
+            USER.findByIdAndDelete(userId),
+
+            MESSAGE.deleteMany({ 
+                $or: [{ senderId: userId }, { receiverId: userId }] 
+            }),
+
+            CONVERSATION.deleteMany({ 
+                participants: userId 
+            }),
+
+            CONTACT.deleteMany({ 
+                $or: [{ owner: userId }, { contact: userId }] 
+            })
+        ]);
+
+        res.status(200).json({ success: true, message: "Account and all data deleted successfully" });
+
+    } catch (error) {
+        console.error("Error deleting account:", error);
+        next(error);
+    }
+};

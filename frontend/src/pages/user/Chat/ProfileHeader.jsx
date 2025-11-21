@@ -1,16 +1,19 @@
+import { useState } from "react";
+import OwnUserProfile from "../OwnUserProfile/OwnUserProfile";
 import useChatStore from "../../../store/useChatStore";
 import useAuthStore from "../../../store/useAuthStore";
 import { images, audios } from "../../../assets/assets";
-import { Link } from "react-router-dom";
 import { LuLogOut } from "react-icons/lu";
 import { logout } from "../../../services/authServices";
 import { useMutation } from "@tanstack/react-query";
 import { IoVolumeHighSharp, IoVolumeMuteSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
 
+
 const ProfileHeader = () => {
     const { user, setLogout, disconnectSocket } = useAuthStore();
     const {isSoundEnabled, toggleSound} = useChatStore();
+    const [showMyProfile, setShowMyProfile] = useState(false);
 
     const { mutate: logoutMutate } = useMutation({
         mutationFn: logout,
@@ -42,16 +45,17 @@ const ProfileHeader = () => {
     }
 
     return (
+        <>
         <div className="p-6 border-b border-slate-700/50">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                     <div className="avatar online">
-                        <Link to="/user/profile" className="size-14 rounded-full overflow-hidden relative group border-2 border-slate-500">
+                        <button onClick={() => setShowMyProfile(true)} className="size-14 rounded-full overflow-hidden relative group border-2 border-slate-500 cursor-pointer">
                             <img src={ user.profilePic ?? images.defaultProfile } alt={ user.fullName } />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                 <span className="text-white text-xs">Profile</span>
                             </div>
-                        </Link>
+                        </button>
                     </div>
                     <div className="flex-1 min-w-0">
                         <h3 className="text-slate-200 font-medium text-base truncate">
@@ -82,6 +86,8 @@ const ProfileHeader = () => {
                 </div>
             </div>
         </div>
+        {showMyProfile && <OwnUserProfile onClose={() => setShowMyProfile(false)} />}
+        </>
     )
 }
 

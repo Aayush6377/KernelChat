@@ -29,6 +29,8 @@ router.use(isLogin);
 //Profile
 router.patch("/profile/update", uploader.single("profilePic"), updateProfileValidator, handleFormError, authController.updateProfile);
 router.get("/profile/details", authController.getProfileDetails);
+router.put("/profile/password", resetPasswordValidator, handleFormError, authController.updatePassword);
 router.post("/logout", authController.logout);
+router.delete("/profile/delete", authController.deleteAccount);
 
 export default router;

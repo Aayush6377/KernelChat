@@ -81,7 +81,7 @@ export const getChatPartners = async (req, res, next) => {
                 },
               },
             },
-            { $project: { nickname: 1, isFavorite: 1, _id: 0 } },
+            { $project: { nickname: 1, isFavorite: 1, isBlocked: 1, _id: 0 } },
           ],
           as: "contactInfo",
         },
@@ -178,6 +178,7 @@ export const getChatPartners = async (req, res, next) => {
           },
           isContact: { $cond: { if: "$contactInfo", then: true, else: false } },
           isFavorite: { $ifNull: ["$contactInfo.isFavorite", false] },
+          isBlocked: { $ifNull: ["$contactInfo.isBlocked", false] },
         },
       },
     ];

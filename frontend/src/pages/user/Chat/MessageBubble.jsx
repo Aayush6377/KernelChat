@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import useChatStore from "../../../store/useChatStore";
 import { deleteMessage, editMessage } from "../../../services/userServices";
 import { toast } from "react-hot-toast";
-import { BsThreeDotsVertical, BsDownload, BsPencil, BsTrash } from "react-icons/bs";
+import { BsDownload, BsPencil, BsTrash } from "react-icons/bs";
+import { FaAngleDown } from "react-icons/fa6";
 import { MdCheck, MdClose } from "react-icons/md";
 
 const formatTime = (isoString) => {
@@ -87,7 +88,7 @@ const MessageBubble = ({ msg, isMe }) => {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `image-${Date.now()}.jpg`; 
+            link.download = `KernelChat-${Date.now()}.jpg`; 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -135,12 +136,9 @@ const MessageBubble = ({ msg, isMe }) => {
                     <div className="absolute top-2 right-2" ref={menuRef}>
                         <button 
                             onClick={() => setShowMenu(!showMenu)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-black/20 rounded text-xs text-white/70"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-black/20 rounded text-xs text-white/70 cursor-pointer"
                         >
-                           
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-4">
-                                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                            </svg>
+                           <FaAngleDown />
                         </button>
 
                         {showMenu && (
@@ -148,7 +146,7 @@ const MessageBubble = ({ msg, isMe }) => {
                                 {msg.text && (
                                     <button 
                                         onClick={() => { setIsEditing(true); setShowMenu(false); }}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
                                     >
                                         <BsPencil size={14} /> Edit
                                     </button>
@@ -157,7 +155,7 @@ const MessageBubble = ({ msg, isMe }) => {
                                 {msg.image && (
                                     <button 
                                         onClick={handleDownload}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
                                     >
                                         <BsDownload size={14} /> Download
                                     </button>
@@ -165,7 +163,7 @@ const MessageBubble = ({ msg, isMe }) => {
 
                                 <button 
                                     onClick={handleDelete}
-                                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
                                 >
                                     <BsTrash size={14} /> Delete
                                 </button>

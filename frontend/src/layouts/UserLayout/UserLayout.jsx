@@ -16,7 +16,7 @@ const UserLayout = () => {
     }, [isLoggedIn, appLoading, navigation]);
     return (
         <>
-           <Outlet /> 
+           <Outlet />
         </>
     )
 }

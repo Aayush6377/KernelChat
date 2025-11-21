@@ -2,7 +2,7 @@ import { body } from "express-validator";
 import USER from "../models/user.model.js";
 import CONTACT from "../models/contact.model.js";
 
-export const addContactValidator = [
+export const addContactByEmailValidator = [
     body("email").trim()
     .notEmpty().withMessage("Email is required")
     .isEmail().withMessage("Email is not in proper format")
@@ -26,8 +26,8 @@ export const addContactValidator = [
         return true;
     }),
 
-    body("nickname").trim()
-    .notEmpty().withMessage("Nickname is required"),
+    body("nickname").optional().trim()
+    .notEmpty().withMessage("Name is required"),
 
     body("notes").optional().trim()
 ];

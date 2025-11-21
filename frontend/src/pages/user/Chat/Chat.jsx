@@ -6,9 +6,11 @@ import ActiveTabSwitch from "./ActiveTabSwitch";
 import ChatWindow from "./ChatWindow";
 import ChatList from "./ChatList";
 import EmptyChatPlaceholder from "./EmptyChatPlaceholder";
+import ContactProfile from "../ContactProfile/ContactProfile";
 
 const Chat = () => {
     const { activeTab, selectedUser } = useChatStore();
+    
     return (
         <div className='relative w-full max-w-6xl h-[800px]'>
             <BorderAnimatedContainer>
