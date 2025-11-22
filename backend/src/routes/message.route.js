@@ -13,5 +13,6 @@ router.get("/chats/list", messageController.getChatPartners);
 router.post("/send/:receiverId", uploader.single("image"), messageController.sendMessage);
 router.delete("/delete/:messageId", messageController.deleteMessage);
 router.put("/edit/:messageId", messageController.editMessage);
+router.post("/forward", messageController.forwardMessage);
 
 export default router;

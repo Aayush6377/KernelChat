@@ -340,7 +340,11 @@ export const deleteMessage = async (req,res,next) => {
     }
 
     if (message.imagePublicId){
-      cloudinary.uploader.destroy(message.imagePublicId);
+      const isUsedElsewhere = await MESSAGE.exists({ imagePublicId: message.imagePublicId, _id: { $ne: messageId } });
+
+      if (!isUsedElsewhere){
+        cloudinary.uploader.destroy(message.imagePublicId);
+      }
     }
 
     await MESSAGE.findByIdAndDelete(messageId);
@@ -373,6 +377,7 @@ export const editMessage = async (req,res,next) => {
     }
 
     message.text = newText;
+    message.isEdited = true;
     await message.save();
 
     const receiverSocketId = getReceiverSocketId(message.receiverId);
@@ -382,6 +387,43 @@ export const editMessage = async (req,res,next) => {
     }
 
     res.status(200).json({ success: true, message: "Message updated", data: message });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const forwardMessage = async (req,res,next) => {
+  try {
+    const { messageId, receiverIds } = req.body;
+    const senderId = req.userId;
+
+    const originalMessage = await MESSAGE.findById(messageId);
+    if (!originalMessage) return res.status(404).json({ message: "Message not found" });
+
+    const newMessages = [];
+
+    for (const receiverId of receiverIds){
+      let convo = await CONVERSATION.findOne({ participants: { $all: [senderId, receiverId] } });
+      if (!convo){
+        convo = new CONVERSATION({ participants: [senderId, receiverId], lastRead: {} });
+      }
+
+      const newMessage = new MESSAGE({ senderId, receiverId, text: originalMessage.text, image: originalMessage.image, imagePublicId: originalMessage.imagePublicId, conversationId: convo._id });
+      await newMessage.save();
+      newMessages.push(newMessage);
+
+      convo.lastMessage = newMessage._id;
+      convo.lastRead.set(senderId.toString(), new Date());
+      await convo.save();
+
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      if (receiverSocketId){
+        io.to(receiverSocketId).emit("newMessage", { ...newMessage._doc, text: originalMessage.text });
+      }
+    }
+
+    res.status(200).json({ success: true, message: "Message forwarded" });
+
   } catch (error) {
     next(error);
   }

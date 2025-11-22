@@ -166,3 +166,13 @@ export const deleteMyAccount = async () => {
         throw error;
     }
 }
+
+export const forwardMessage = async ({ messageId, receiverIds }) => {
+    try {
+        const res = await api.post("/api/messages/forward", { messageId, receiverIds });
+        return res.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}

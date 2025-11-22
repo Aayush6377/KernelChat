@@ -33,3 +33,48 @@
   @apply px-4 py-2 inline-block bg-cyan-500/10 rounded-lg text-cyan-400
   hover:text-cyan-500 text-sm transition-colors;
 }
+
+@layer base {
+ 
+  ::selection {
+    background-color: #06b6d4; 
+    color: #ffffff;
+  }
+  
+  ::-moz-selection {
+    background-color: #06b6d4;
+    color: #ffffff;
+  }
+
+  body {
+    @apply bg-slate-900 text-slate-200 antialiased;
+  }
+}
+
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; 
+}
+
+
+::-webkit-scrollbar-track {
+  background: #0f172a; 
+  border-radius: 4px;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+  border: 2px solid #0f172a; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; 
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0f172a;
+}
