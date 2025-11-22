@@ -11,11 +11,6 @@ const Chat = () => {
     const { activeTab, selectedUser } = useChatStore();
     
     return (
-        // --- FIX EXPLAINED ---
-        // 1. 'fixed inset-0': Forces the chat to cover the ENTIRE mobile screen (no scrolling the body).
-        // 2. 'z-50': Ensures it sits on top of any other mobile UI.
-        // 3. 'md:relative md:inset-auto': Resets this for desktop so it sits in the layout.
-        // 4. 'md:h-[800px]': Keeps your fixed height preference for desktop.
         <div className='fixed inset-0 z-50 bg-slate-900 md:relative md:inset-auto md:w-full md:max-w-6xl md:h-[800px]'>
             <BorderAnimatedContainer>
                 <div className="w-full h-full flex">
