@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { MessageCircle, Shield, Zap, Image as ImageIcon, Globe, Heart } from 'lucide-react';
 import { images } from '../../../assets/assets'; 
 import Footer from "../../../components/Footer/Footer";
+import { Menu, X } from 'lucide-react';
 
 const Home = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 overflow-hidden font-sans selection:bg-cyan-500/30">
       
@@ -13,7 +16,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] opacity-20" />
       </div>
 
-      <nav className="relative z-10 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className="relative z-50 max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-2">
             <div className="w-10 h-10">
                 <img src={images.logo} alt="KernelChat" className="w-full h-full object-contain" />
@@ -22,7 +25,8 @@ const Home = () => {
                 KernelChat
             </span>
         </div>
-        <div className="flex items-center gap-4">
+
+        <div className="hidden md:flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                 Log In
             </Link>
@@ -30,6 +34,30 @@ const Home = () => {
                 Get Started
             </Link>
         </div>
+
+        <button 
+            className="md:hidden p-2 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {isMobileMenuOpen && (
+            <div className="absolute top-full left-0 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 p-6 flex flex-col gap-4 shadow-2xl md:hidden animate-in slide-in-from-top-5 duration-200">
+                <Link 
+                    to="/login" 
+                    className="text-center py-3 text-slate-300 hover:text-white font-medium border border-slate-700 rounded-xl hover:bg-slate-800 transition-colors"
+                >
+                    Log In
+                </Link>
+                <Link 
+                    to="/signup" 
+                    className="text-center py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-cyan-50 transition-colors shadow-lg"
+                >
+                    Get Started
+                </Link>
+            </div>
+        )}
       </nav>
 
       <header className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32 flex flex-col items-center text-center">
