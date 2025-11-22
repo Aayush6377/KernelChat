@@ -6,7 +6,7 @@
 
 ## 🔗 Live Demo
 
-Check out the live application here: **[View Live Demo](YOUR_DEPLOYED_LINK_HERE)**
+Check out the live application here: **[View Live Demo](https://kernel-chat-six.vercel.app)**
 
 ---
 
@@ -43,7 +43,7 @@ To run the full stack locally, you need to run both the backend and frontend ter
 
 **1. Clone the repository**
 ```bash
-git clone [https://github.com/Aayush6377/KernelChat.git](https://github.com/Aayush6377/KernelChat.git)
+git clone https://github.com/Aayush6377/KernelChat.git
 cd KernelChat
 ```
 
